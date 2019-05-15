@@ -1,0 +1,410 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 843.0
+#  >methods=299
+#  >complexity=3033
+#  >construction=77.0
+#  >dependency=296.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample$GeneratedCriteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample$Criterion.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample.java
+# Target TGF: 278.0
+#  >methods=73
+#  >complexity=773
+#  >construction=20.5
+#  >dependency=70.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceBranchDOExample$GeneratedCriteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceBranchDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceBranchDOExample$Criterion.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceBranchDOExample.java
+# Target TGF: 403.0
+#  >methods=123
+#  >complexity=1273
+#  >construction=33.0
+#  >dependency=120.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceSnapshotDOExample$GeneratedCriteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceSnapshotDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceSnapshotDOExample$Criterion.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceSnapshotDOExample.java
+# Target TGF: 140.928571429
+#  >methods=15
+#  >complexity=376
+#  >construction=5.39285714286
+#  >dependency=9.5
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/impl/HttpInterfaceDaoImpl.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/impl/HttpInterfaceDaoImpl.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/enums/ConfigMode.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/enums/ConfigMode.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/enums/AccessAuthority.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/enums/AccessAuthority.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/HttpInterfaceKeyBO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/HttpInterfaceKeyBO.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/HttpInterfaceDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/HttpInterfaceDao.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/HttpInterfaceBranchDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/HttpInterfaceBranchDao.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/mapper/auto/HttpInterfaceDOMapper.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/mapper/auto/HttpInterfaceDOMapper.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDO.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/HttpInterfaceBO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/HttpInterfaceBO.java
+   - dir: common/base/target/classes
+     file: com/dxm/anymock/common/base/exception/BizException.class
+     sourceDir: common/base/src/main/java
+     sourceFile: com/dxm/anymock/common/base/exception/BizException.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample$Criteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/HttpInterfaceHeaderDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/HttpInterfaceHeaderDao.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/IncorrectResultSizeException.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/IncorrectResultSizeException.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDOExample.java
+# Target TGF: 103.5
+#  >methods=2
+#  >complexity=23
+#  >construction=9.0
+#  >dependency=0.5
+ - target:
+   - dir: core/biz/target/classes
+     file: com/dxm/anymock/core/biz/Delayer.class
+     sourceDir: core/biz/src/main/java
+     sourceFile: com/dxm/anymock/core/biz/Delayer.java
+   - dir: common/base/target/classes
+     file: com/dxm/anymock/common/base/exception/BizException.class
+     sourceDir: common/base/src/main/java
+     sourceFile: com/dxm/anymock/common/base/exception/BizException.java
+# Target TGF: 278.0
+#  >methods=73
+#  >complexity=773
+#  >construction=20.5
+#  >dependency=70.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceHeaderDOExample$GeneratedCriteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceHeaderDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceHeaderDOExample$Criterion.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceHeaderDOExample.java
+# Target TGF: 96.75
+#  >methods=10
+#  >complexity=207
+#  >construction=2.5
+#  >dependency=4.0
+ - target:
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/service/impl/SpaceServiceImpl.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/service/impl/SpaceServiceImpl.java
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/security/PrivilegeVerifier.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/security/PrivilegeVerifier.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/SpaceDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/SpaceDao.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/HttpInterfaceBO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/HttpInterfaceBO.java
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/model/response/dto/SpaceDTO.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/model/response/dto/SpaceDTO.java
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/service/HttpInterfaceService.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/service/HttpInterfaceService.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/SpaceBO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/SpaceBO.java
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/service/SpaceService.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/service/SpaceService.java
+   - dir: common/base/target/classes
+     file: com/dxm/anymock/common/base/exception/BizException.class
+     sourceDir: common/base/src/main/java
+     sourceFile: com/dxm/anymock/common/base/exception/BizException.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/HttpInterfaceDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/HttpInterfaceDao.java
+   - dir: manager/biz/target/classes
+     file: com/dxm/anymock/manager/biz/security/SecurityContextHolder.class
+     sourceDir: manager/biz/src/main/java
+     sourceFile: com/dxm/anymock/manager/biz/security/SecurityContextHolder.java
+# Target TGF: 210.0
+#  >methods=45
+#  >complexity=210
+#  >construction=14.0
+#  >dependency=14.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/HttpInterfaceDO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/HttpInterfaceDO.java
+# Target TGF: 333.0
+#  >methods=95
+#  >complexity=993
+#  >construction=26.0
+#  >dependency=92.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/SpaceDOExample$GeneratedCriteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/SpaceDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/SpaceDOExample$Criterion.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/SpaceDOExample.java
+# Target TGF: 96.0
+#  >methods=11
+#  >complexity=186
+#  >construction=3.75
+#  >dependency=6.0
+ - target:
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/impl/SpaceDaoImpl.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/impl/SpaceDaoImpl.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/dao/SpaceDao.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/dao/SpaceDao.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/SpaceDOExample$Criteria.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/SpaceDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/mapper/auto/SpaceDOMapper.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/mapper/auto/SpaceDOMapper.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/enums/AccessAuthority.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/enums/AccessAuthority.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/model/SpaceBO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/model/SpaceBO.java
+   - dir: common/base/target/classes
+     file: com/dxm/anymock/common/base/exception/BizException.class
+     sourceDir: common/base/src/main/java
+     sourceFile: com/dxm/anymock/common/base/exception/BizException.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/SpaceDO.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/SpaceDO.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/entity/SpaceDOExample.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/entity/SpaceDOExample.java
+   - dir: common/dal/target/classes
+     file: com/dxm/anymock/common/dal/IncorrectResultSizeException.class
+     sourceDir: common/dal/src/main/java
+     sourceFile: com/dxm/anymock/common/dal/IncorrectResultSizeException.java
